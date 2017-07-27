@@ -72,10 +72,10 @@ ERL_NIF_TERM ringbuffer_new(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   if (argc != 2) {
     return enif_make_badarg(env);
   }
-  buffer_env = (ringbuffer_priv_t*) enif_priv_data(env);
 
+  buffer_env = (ringbuffer_priv_t*) enif_priv_data(env);
   enif_get_uint(env, argv[0], &capacity);
-  
+
   buffer_res = enif_alloc_resource(RES_TYPE, sizeof(ringbuffer_t));
   buffer_res->default_term = enif_make_copy(buffer_env->environment, argv[1]);
   buffer_res->size = capacity;
@@ -92,7 +92,6 @@ ERL_NIF_TERM ringbuffer_new(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
 ERL_NIF_TERM ringbuffer_get(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
   ringbuffer_t *buffer_res;
-  ringbuffer_priv_t* buffer_env;
   unsigned int position;
 
   if (argc != 2) {
@@ -102,8 +101,6 @@ ERL_NIF_TERM ringbuffer_get(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   if (!enif_get_resource(env, argv[0], RES_TYPE, (void**) &buffer_res)) {
     return enif_make_badarg(env);
   }
-
-  buffer_env = (ringbuffer_priv_t*) enif_priv_data(env);
 
   enif_get_uint(env, argv[1], &position);
 
