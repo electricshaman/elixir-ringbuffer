@@ -1,13 +1,6 @@
 MIX = mix
-
 CC ?= $(CROSSCOMPILE)-gcc
-CFLAGS ?= -O3 -Wall -Wextra -Wno-unused-parameter
-
-ERLANG_PATH = $(shell erl -eval 'io:format("~s", [lists:concat([code:root_dir(), "/erts-", erlang:system_info(version), "/include"])])' -s init stop -noshell)
-
-CFLAGS += -I$(ERLANG_PATH)
-MODES_PATH = .
-CFLAGS += -I$(MODES_PATH)/src
+CFLAGS ?= -g -O3 -std=gnu99 -pedantic -Wall -Wextra -Wno-unused-parameter
 
 ifneq ($(OS),Windows_NT)
 	CFLAGS += -fPIC
@@ -17,8 +10,17 @@ ifneq ($(OS),Windows_NT)
 	endif
 endif
 
-DEFAULT_TARGETS ?= priv priv/ringbuffer.so
+ifeq ($(ERL_EI_INCLUDE_DIR),)
+ERL_ROOT_DIR = $(shell erl -eval "io:format(\"~s~n\", [code:root_dir()])" -s init stop -noshell)
+ifeq ($(ERL_ROOT_DIR),)
+   $(error Could not find Erlang installation.)
+endif
+ERL_EI_INCLUDE_DIR = "$(ERL_ROOT_DIR)/usr/include"
+endif
 
+ERL_CFLAGS ?= -I$(ERL_EI_INCLUDE_DIR)
+
+DEFAULT_TARGETS ?= priv priv/ringbuffer.so
 SRC=$(wildcard src/*.c)
 
 .PHONY: all clean
@@ -29,7 +31,7 @@ priv:
 	mkdir -p priv
 
 priv/ringbuffer.so: src/ringbuffer.c
-	$(CC) $^ $(CFLAGS) -shared $(LDFLAGS) -o $@
+	$(CC) $^ -c $(ERL_CFLAGS) $(CFLAGS) -shared -o $@
 
 clean:
-	rm -f priv/ringbuffer.so
+	$(RM) priv/ringbuffer.so
