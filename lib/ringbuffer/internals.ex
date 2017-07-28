@@ -12,16 +12,20 @@ defmodule RingBuffer.Internals do
 
   defstruct size: 0, head: 0, tail: 0, default: :undefined, buffer: nil
 
+  @app     Mix.Project.config[:app]
   @on_load :init
-
-  app = Mix.Project.config[:app]
+  @compile {:autoload, false}
 
   @doc false
   # Load NIF with fallback
   def init do
-    unless Application.get_env(:ringbuffer, :disable_nif, false) do
-      unless :ok = unquote(app) |> :code.priv_dir |> :filename.join('ringbuffer') |> :erlang.load_nif(0) do
-        Logger.warn("Unable to load native interface, falling back to pure Elixir implementation")
+    unless Application.get_env(@app, :disable_nif, false) do
+      so_path = Path.join(:code.priv_dir(@app), "ringbuffer")
+      case :erlang.load_nif(so_path, 0) do
+        :ok -> :ok
+        {:error, {_reason, msg}} ->
+          Logger.warn("Unable to load native interface, falling back to pure Elixir implementation: #{to_string(msg)}")
+          :ok
       end
     end
     :ok
