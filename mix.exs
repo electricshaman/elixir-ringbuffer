@@ -8,6 +8,7 @@ defmodule RingBuffer.Mixfile do
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      compilers: [:elixir_make] ++ Mix.compilers,
+     make_clean: ["clean"],
      source_url: "https://github.com/brandonhamilton/elixir-ringbuffer",
      homepage_url: "https://github.com/brandonhamilton/elixir-ringbuffer",
      docs: [extras: ["README.md"]],
